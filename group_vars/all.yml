@@ -1,0 +1,6 @@
+---
+ansible_user: debian
+ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+flannel_iface: eth0
+vip_address: '10.9.9.99'
+k3s_manifests_directory: /var/lib/rancher/k3s/server/manifests

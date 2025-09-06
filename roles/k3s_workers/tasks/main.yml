@@ -1,0 +1,5 @@
+---
+- name: Install K3s on workers and join them to cluster
+  script: k3s-install.sh agent --server https://{{ vip_address }}:6443 --flannel-iface {{ flannel_iface }} --node-ip {{ ansible_host }}
+  environment:
+    K3S_TOKEN: "{{ node_token }}"

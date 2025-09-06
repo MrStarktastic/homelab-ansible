@@ -1,0 +1,39 @@
+---
+- name: Create manifests directory
+  file:
+    path: "{{ k3s_manifests_directory }}"
+    state: directory
+
+- name: Upload Kube-Vip RBAC Manifest
+  get_url:
+    url: https://kube-vip.io/manifests/rbac.yaml
+    dest: "{{ k3s_manifests_directory }}/kube-vip-rbac.yaml"
+
+- name: Get Kube-Vip releases
+  uri:
+    url: https://api.github.com/repos/kube-vip/kube-vip/releases
+    method: GET
+    return_content: yes
+    status_code: 200
+    body_format: json
+  register: kube_vip_releases
+
+- name: Set version of Kube-Vip to latest
+  set_fact:
+    kube_vip_version: "{{ kube_vip_releases.json[0].tag_name }}"
+
+- name: Pull Kube-Vip image
+  command: ctr image pull ghcr.io/kube-vip/kube-vip:{{ kube_vip_version }}
+
+- name: Generate Kube-Vip DaemonSet
+  command: >
+    ctr run --rm --net-host ghcr.io/kube-vip/kube-vip:{{ kube_vip_version }} vip /kube-vip \
+      manifest daemonset \
+      --interface {{ flannel_iface }} --address {{ vip_address }} \
+      --inCluster --taint --controlplane --services --arp --leaderElection
+  register: kube_vip_daemonset_manifest
+
+- name: Copy Kube-Vip DaemonSet to manifests directory
+  copy:
+    content: "{{ kube_vip_daemonset_manifest.stdout }}"
+    dest: "{{ k3s_manifests_directory }}/kube-vip-daemonset.yaml"

@@ -1,0 +1,8 @@
+---
+- name: Install K3s and initialize cluster
+  script: k3s-install.sh server --cluster-init --tls-san {{ vip_address }}
+  environment:
+    INSTALL_K3S_EXEC: --flannel-iface {{ flannel_iface }} --node-ip {{ ansible_host }} --disable traefik --disable servicelb
+
+- name: Set up Kube-Vip
+  include_tasks: kube-vip.yml

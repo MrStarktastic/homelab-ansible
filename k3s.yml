@@ -1,0 +1,53 @@
+---
+- hosts: all_k3s
+  become: true
+  gather_facts: false
+  roles:
+    - role: dns_from_cloudinit
+
+- name: Download K3s installation script
+  hosts: localhost
+  gather_facts: true
+  tasks:
+    - get_url:
+        url: https://get.k3s.io
+        dest: ./k3s-install.sh
+
+- name: Initialize k3s cluster
+  hosts: masters[0]
+  become: true
+  roles:
+    - role: k3s_init
+
+- name: Prepare to join other nodes
+  hosts: all_k3s
+  run_once: true
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Fetch node token
+      delegate_to: "{{ groups['masters'] | first }}"
+      slurp:
+        src: /var/lib/rancher/k3s/server/node-token
+      register: node_token_slurp
+
+    - name: Set node token
+      set_fact:
+        node_token: "{{ node_token_slurp['content'] | b64decode | trim }}"
+    
+    - name: Wait for Virtual IP to be available
+      delegate_to: "{{ vip_address }}"
+      wait_for_connection:
+        timeout: 60
+
+- name: Set up additional masters
+  hosts: masters[1:]
+  become: true
+  roles:
+    - role: k3s_masters
+
+- name: Set up workers
+  hosts: workers
+  become: true
+  roles:
+    - role: k3s_workers
