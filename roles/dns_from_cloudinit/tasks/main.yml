@@ -15,7 +15,8 @@
   changed_when: false
   when: eni.stat.exists
 
-- ansible.builtin.set_fact:
+- name: Set nameservers variable
+  ansible.builtin.set_fact:
     _dns_nameservers: "{{ lo_ns.stdout.split() if (eni.stat.exists and (lo_ns.stdout | trim) != '') else [] }}"
 
 - name: Fallback to default gateway if no nameservers found
@@ -24,11 +25,13 @@
   changed_when: false
   when: _dns_nameservers | length == 0
 
-- ansible.builtin.set_fact:
+- name: Set nameservers variable to default gateway
+  ansible.builtin.set_fact:
     _dns_nameservers: ["{{ gw.stdout }}"]
   when: _dns_nameservers | length == 0 and (gw.stdout | trim) != ""
 
-- ansible.builtin.assert:
+- name: Assert that we have at least one nameserver
+  ansible.builtin.assert:
     that: _dns_nameservers | length > 0
     fail_msg: "No DNS nameserver found."
     success_msg: "Using DNS servers: {{ _dns_nameservers | join(', ') }}"
