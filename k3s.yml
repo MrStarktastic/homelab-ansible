@@ -1,5 +1,6 @@
 ---
-- hosts: all_k3s
+- name: Set up a k3s cluster
+  hosts: all_k3s
   become: true
   gather_facts: false
   roles:
@@ -9,7 +10,7 @@
   hosts: localhost
   gather_facts: true
   tasks:
-    - get_url:
+    - ansible.builtin.get_url:
         url: https://get.k3s.io
         dest: ./k3s-install.sh
 
@@ -27,17 +28,17 @@
   tasks:
     - name: Fetch node token
       delegate_to: "{{ groups['masters'] | first }}"
-      slurp:
+      ansible.builtin.slurp:
         src: /var/lib/rancher/k3s/server/node-token
       register: node_token_slurp
 
     - name: Set node token
-      set_fact:
+      ansible.builtin.set_fact:
         node_token: "{{ node_token_slurp['content'] | b64decode | trim }}"
     
     - name: Wait for Virtual IP to be available
       delegate_to: "{{ vip_address }}"
-      wait_for_connection:
+      ansible.builtin.wait_for_connection:
         timeout: 60
 
 - name: Set up additional masters

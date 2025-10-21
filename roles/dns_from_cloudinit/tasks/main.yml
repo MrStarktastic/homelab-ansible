@@ -1,11 +1,11 @@
 ---
 - name: Read cloud-init ENI file
-  stat:
+  ansible.builtin.stat:
     path: /etc/network/interfaces.d/50-cloud-init
   register: eni
 
 - name: Extract nameservers from 'lo' stanza in ENI
-  shell: |
+  ansible.builtin.shell: |
     awk '
       $0 ~ /^iface[[:space:]]+lo[[:space:]]+inet/ { inlo=1; next }
       $0 ~ /^iface[[:space:]]+/ { inlo=0 }
@@ -15,26 +15,26 @@
   changed_when: false
   when: eni.stat.exists
 
-- set_fact:
+- ansible.builtin.set_fact:
     _dns_nameservers: "{{ lo_ns.stdout.split() if (eni.stat.exists and (lo_ns.stdout | trim) != '') else [] }}"
 
 - name: Fallback to default gateway if no nameservers found
-  shell: "ip -4 route show default | awk '{print $3}' | head -n1"
+  ansible.builtin.shell: "ip -4 route show default | awk '{print $3}' | head -n1"
   register: gw
   changed_when: false
   when: _dns_nameservers | length == 0
 
-- set_fact:
+- ansible.builtin.set_fact:
     _dns_nameservers: ["{{ gw.stdout }}"]
   when: _dns_nameservers | length == 0 and (gw.stdout | trim) != ""
 
-- assert:
+- ansible.builtin.assert:
     that: _dns_nameservers | length > 0
     fail_msg: "No DNS nameserver found."
     success_msg: "Using DNS servers: {{ _dns_nameservers | join(', ') }}"
 
 - name: Write /etc/resolv.conf from effective values
-  template:
+  ansible.builtin.template:
     src: resolv.conf.j2
     dest: /etc/resolv.conf
     mode: "0644"
