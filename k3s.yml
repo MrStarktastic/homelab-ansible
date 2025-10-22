@@ -1,18 +1,20 @@
 ---
-- name: Set up a k3s cluster
+- name: Set up a K3s cluster
   hosts: all_k3s
   become: true
   gather_facts: false
   roles:
     - role: dns_from_cloudinit
 
-- name: Download K3s installation script
+- name: Save K3s installation script locally
   hosts: localhost
   gather_facts: true
   tasks:
-    - ansible.builtin.get_url:
+    - name: Download script
+      ansible.builtin.get_url:
         url: https://get.k3s.io
         dest: ./k3s-install.sh
+        mode: '0755'
 
 - name: Initialize k3s cluster
   hosts: masters[0]
