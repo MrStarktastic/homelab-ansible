@@ -16,11 +16,11 @@
     return_content: yes
     status_code: 200
     body_format: json
-  register: kube_vip_releases
+  register: k3s_init_kube_vip_releases
 
 - name: Set version of Kube-Vip to latest
   ansible.builtin.set_fact:
-    kube_vip_version: "{{ kube_vip_releases.json[0].tag_name }}"
+    kube_vip_version: "{{ k3s_init_kube_vip_releases.json[0].tag_name }}"
 
 - name: Pull Kube-Vip image
   ansible.builtin.command: ctr image pull ghcr.io/kube-vip/kube-vip:{{ kube_vip_version }}
