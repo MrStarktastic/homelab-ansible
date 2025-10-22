@@ -22,16 +22,19 @@
 
 - name: Set version of Kube-Vip to latest
   ansible.builtin.set_fact:
-    k3s_init_kube_vip_version: "{{ k3s_init_kube_vip_releases.json[0].tag_name }}"
+    k3s_init_kube_vip_version:
+      "{{ k3s_init_kube_vip_releases.json[0].tag_name }}"
 
 - name: Pull Kube-Vip image
-  ansible.builtin.command: ctr image pull ghcr.io/kube-vip/kube-vip:{{ k3s_init_kube_vip_version }}
+  ansible.builtin.command: >-
+    ctr image pull ghcr.io/kube-vip/kube-vip:{{ k3s_init_kube_vip_version }}
   changed_when: "'up to date' not in kube_vip_pull.stdout"
 
 - name: Generate Kube-Vip DaemonSet
-  ansible.builtin.command: >
-    ctr run --rm --net-host ghcr.io/kube-vip/kube-vip:{{ k3s_init_kube_vip_version }} vip /kube-vip \
-      manifest daemonset \
+  ansible.builtin.command: >-
+    ctr run --rm --net-host \
+      ghcr.io/kube-vip/kube-vip:{{ k3s_init_kube_vip_version }} \
+      vip /kube-vip manifest daemonset \
       --interface {{ flannel_iface }} --address {{ vip_address }} \
       --inCluster --taint --controlplane --services --arp --leaderElection
   register: k3s_init_kube_vip_daemonset_manifest
