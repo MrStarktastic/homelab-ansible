@@ -37,7 +37,7 @@
     - name: Set node token
       ansible.builtin.set_fact:
         node_token: "{{ node_token_slurp['content'] | b64decode | trim }}"
-    
+
     - name: Wait for Virtual IP to be available
       delegate_to: "{{ vip_address }}"
       ansible.builtin.wait_for_connection:

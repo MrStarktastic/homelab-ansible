@@ -6,6 +6,7 @@
 
 - name: Extract nameservers from 'lo' stanza in ENI
   ansible.builtin.shell: |
+    set -o pipefail
     awk '
       $0 ~ /^iface[[:space:]]+lo[[:space:]]+inet/ { inlo=1; next }
       $0 ~ /^iface[[:space:]]+/ { inlo=0 }
@@ -20,7 +21,9 @@
     dns_from_cloudinit_dns_nameservers: "{{ lo_ns.stdout.split() if (dns_from_cloudinit_eni.stat.exists and (lo_ns.stdout | trim) != '') else [] }}"
 
 - name: Fallback to default gateway if no nameservers found
-  ansible.builtin.shell: "ip -4 route show default | awk '{print $3}' | head -n1"
+  ansible.builtin.shell: |
+    set -o pipefail
+    ip -4 route show default | awk '{print $3}' | head -n1
   register: dns_from_cloudinit_gw
   changed_when: false
   when: dns_from_cloudinit_dns_nameservers | length == 0
