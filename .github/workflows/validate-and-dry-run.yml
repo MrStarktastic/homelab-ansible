@@ -24,11 +24,11 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Install Ansible
-        run: |
-          curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-          python3 get-pip.py --user
-          python3 -m pip install --user ansible
+      - uses: actions/setup-python@v6
+        with:
+          cache: 'pip'
+
+      - run: pip install ansible
 
       - name: Run Ansible Playbook in check mode
         run: |
