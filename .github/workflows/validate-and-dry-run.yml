@@ -28,6 +28,7 @@ jobs:
         with:
           python-version: '3.x'
           pip-install: 'ansible'
+          ignore-platform-version: true
           cache: 'pip'
 
       - name: Run Ansible Playbook in check mode
