@@ -24,11 +24,6 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.x'
-
       - name: Install Ansible and dependencies
         run: |
           python3 -m pip install --upgrade pip
