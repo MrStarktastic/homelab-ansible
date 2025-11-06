@@ -24,7 +24,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - uses: MrStarktastic/setup-python@v1.1
+      - uses: MrStarktastic/setup-python@v1.2
         with:
           python-version: '3.x'
           pip-install: 'ansible'
