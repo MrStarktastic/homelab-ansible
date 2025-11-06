@@ -27,6 +27,7 @@ jobs:
       - name: Install Ansible
         run: |
           pipx install --include-deps ansible
+          pipx ensurepath
 
       - name: Run Ansible Playbook in check mode
         run: |
