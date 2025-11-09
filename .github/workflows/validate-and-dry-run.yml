@@ -28,9 +28,8 @@ jobs:
       # so I installed pipx manually
       - name: Install Ansible
         run: |
-          for package in requests ansible; do
-            pipx install --include-deps "$package"
-          done
+          pipx install --include-deps ansible
+          pipx inject ansible requests
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
       - name: Run Ansible Playbook in check mode
