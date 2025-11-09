@@ -19,8 +19,8 @@
 - name: Set nameservers variable
   ansible.builtin.set_fact:
     dns_from_cloudinit_dns_nameservers: >-
-      {{ lo_ns.stdout.split()
-      if (dns_from_cloudinit_eni.stat.exists and (lo_ns.stdout | trim) != '')
+      {{ dns_from_cloudinit_lo_ns.stdout.split()
+      if (dns_from_cloudinit_eni.stat.exists and (dns_from_cloudinit_lo_ns.stdout | trim) != '')
       else [] }}
 
 - name: Fallback to default gateway if no nameservers found
