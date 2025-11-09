@@ -40,4 +40,6 @@ jobs:
           PROXMOX_TOKEN_SECRET: ${{ secrets.PROXMOX_TOKEN_SECRET }}
           ANSIBLE_SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
-          ansible-playbook -i inventory/proxmox.yml k3s.yml --check
+          echo "$ANSIBLE_SSH_PRIVATE_KEY" > ansible_private_key
+          chmod 400 ansible_private_key
+          ansible-playbook -i inventory/proxmox.yml --private-key ansible_private_key k3s.yml --check
