@@ -33,10 +33,10 @@
 
 - name: Set nameservers variable to default gateway
   ansible.builtin.set_fact:
-    dns_from_cloudinit_dns_nameservers: ["{{ gw.stdout }}"]
+    dns_from_cloudinit_dns_nameservers: ["{{ dns_from_cloudinit_gw.stdout }}"]
   when: >-
     dns_from_cloudinit_dns_nameservers |
-    length == 0 and (gw.stdout | trim) != ""
+    length == 0 and (dns_from_cloudinit_gw.stdout | trim) != ""
 
 - name: Assert that we have at least one nameserver
   ansible.builtin.assert:
