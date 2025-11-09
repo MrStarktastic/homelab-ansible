@@ -38,6 +38,10 @@
     dns_from_cloudinit_dns_nameservers |
     length == 0 and (dns_from_cloudinit_gw.stdout | trim) != ""
 
+- name: Print nameservers for debugging
+  ansible.builtin.debug:
+    var: dns_from_cloudinit_dns_nameservers
+
 - name: Assert that we have at least one nameserver
   ansible.builtin.assert:
     that: dns_from_cloudinit_dns_nameservers | length > 0
