@@ -1,8 +1,13 @@
 ---
-- name: Set up a K3s cluster
+- name: Wait for all nodes to be reachable & set DNS nameservers
   hosts: all_k3s
   become: true
   gather_facts: false
+  pre_tasks:
+    - name: Wait until all nodes are reachable
+      ansible.builtin.wait_for_connection:
+        timeout: 300
+        sleep: 5
   roles:
     - role: dns_from_cloudinit
 
