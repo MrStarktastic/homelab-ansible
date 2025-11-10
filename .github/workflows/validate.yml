@@ -1,5 +1,5 @@
 ---
-name: Check Ansible syntax and dry run
+name: Validate Ansible playbook
 on:
   workflow_dispatch:
 
@@ -17,8 +17,8 @@ jobs:
       - name: Run ansible-lint
         uses: ansible/ansible-lint@v25.9.2
 
-  dry-run:
-    name: Ansible Dry Run
+  syntax-check:
+    name: Ansible Syntax Check
     runs-on: self-hosted
     needs: validate
     steps:
@@ -32,14 +32,14 @@ jobs:
           pipx inject ansible requests
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
-      - name: Run Ansible Playbook in check mode
+      - name: Run Ansible Syntax Check
         env:
           PROXMOX_URL: ${{ secrets.PROXMOX_URL }}
           PROXMOX_USER: ${{ secrets.PROXMOX_USER }}
           PROXMOX_TOKEN_ID: ${{ secrets.PROXMOX_TOKEN_ID }}
           PROXMOX_TOKEN_SECRET: ${{ secrets.PROXMOX_TOKEN_SECRET }}
-          ANSIBLE_SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          # ANSIBLE_SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
-          echo "$ANSIBLE_SSH_PRIVATE_KEY" > ansible_private_key
-          chmod 400 ansible_private_key
-          ansible-playbook -i inventory/proxmox.yml --private-key ansible_private_key k3s.yml --check
+          # echo "$ANSIBLE_SSH_PRIVATE_KEY" > ansible_private_key
+          # chmod 400 ansible_private_key
+          ansible-playbook -i inventory/proxmox.yml --syntax-check k3s.yml
