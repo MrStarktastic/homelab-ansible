@@ -28,14 +28,15 @@
 - name: Pull Kube-Vip image
   ansible.builtin.command: >-
     ctr image pull ghcr.io/kube-vip/kube-vip:{{ k3s_init_kube_vip_version }}
-  changed_when: "'up to date' not in kube_vip_pull.stdout"
+  register: k3s_init_kube_vip_pull
+  changed_when: "'up to date' not in k3s_init_kube_vip_pull.stdout"
 
 - name: Generate Kube-Vip DaemonSet
   ansible.builtin.command: >-
-    ctr run --rm --net-host \
-      ghcr.io/kube-vip/kube-vip:{{ k3s_init_kube_vip_version }} \
-      vip /kube-vip manifest daemonset \
-      --interface {{ flannel_iface }} --address {{ vip_address }} \
+    ctr run --rm --net-host
+      ghcr.io/kube-vip/kube-vip:{{ k3s_init_kube_vip_version }}
+      vip /kube-vip manifest daemonset
+      --interface {{ flannel_iface }} --address {{ vip_address }}
       --inCluster --taint --controlplane --services --arp --leaderElection
   register: k3s_init_kube_vip_daemonset_manifest
   changed_when: false
