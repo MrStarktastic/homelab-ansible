@@ -1,10 +1,10 @@
 ---
 - name: Install K3s on servers and join them to cluster
   ansible.builtin.script: >-
-    k3s-install.sh server --server https://{{ vip_address }}:6443 \
+    k3s-install.sh server --server https://{{ vip_address }}:6443
     --tls-san {{ vip_address }}
   environment:
     INSTALL_K3S_EXEC: >-
-      --flannel-iface {{ flannel_iface }} --node-ip {{ ansible_host }} \
+      --flannel-iface {{ flannel_iface }} --node-ip {{ ansible_host }}
       --disable traefik --disable servicelb
     K3S_TOKEN: "{{ node_token }}"
