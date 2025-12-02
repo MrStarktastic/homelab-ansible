@@ -1,11 +1,14 @@
 ---
 name: Validate Ansible playbook
 on:
-  workflow_dispatch:
+  workflow_dispatch: # TEMP
 
   pull_request:
     branches:
       - main
+    paths-ignore:
+      - 'README.md'
+      - 'renovate.json'
 
 jobs:
   lint:

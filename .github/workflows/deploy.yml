@@ -1,0 +1,50 @@
+name: Deploy K3s Cluster
+
+on:
+  workflow_dispatch:
+
+  repository_dispatch:
+    types: [infrastructure-changed]
+
+  pull_request_target:
+    types: [closed]
+    branches:
+      - main
+    paths-ignore:
+      - 'README.md'
+      - 'renovate.json'
+
+jobs:
+  deploy:
+    name: Apply Configuration
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      github.event_name == 'repository_dispatch' ||
+      (github.event_name == 'pull_request_target' && github.event.pull_request.merged == true)
+    runs-on: self-hosted
+    env:
+      PROXMOX_URL: ${{ secrets.PROXMOX_URL }}
+      PROXMOX_USER: ${{ secrets.PROXMOX_USER }}
+      PROXMOX_TOKEN_ID: ${{ secrets.PROXMOX_TOKEN_ID }}
+      PROXMOX_TOKEN_SECRET: ${{ secrets.PROXMOX_TOKEN_SECRET }}
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install Ansible
+        run: |
+          pipx install --include-deps ansible
+          pipx inject ansible requests
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Setup SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/private_key.pem
+          chmod 400 ~/.ssh/private_key.pem
+
+      - name: Run K3s Playbook
+        run: |
+          ansible-playbook -i inventory/proxmox.yml \
+            --private-key ~/.ssh/private_key.pem \
+            k3s.yml
