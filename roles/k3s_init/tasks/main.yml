@@ -14,8 +14,6 @@
       --node-ip {{ ansible_host }}
       --disable traefik
       --disable servicelb
-  args:
-    creates: /etc/rancher/k3s/k3s.yaml
 
 - name: Set up Kube-Vip
   ansible.builtin.include_tasks: kube-vip.yml

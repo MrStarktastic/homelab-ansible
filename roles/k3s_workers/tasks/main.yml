@@ -15,5 +15,3 @@
     INSTALL_K3S_EXEC: >-
       --flannel-iface {{ flannel_iface }}
       --node-ip {{ ansible_host }}
-  args:
-    creates: /etc/rancher/k3s/k3s.yaml
