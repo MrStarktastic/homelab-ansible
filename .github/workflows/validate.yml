@@ -13,7 +13,7 @@ jobs:
     name: Ansible Lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Run ansible-lint
         uses: ansible/ansible-lint@v25.9.2
@@ -23,7 +23,7 @@ jobs:
     runs-on: self-hosted
     needs: lint
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       # Apparently the setup-python action is not compatible with Debian
       # so I installed pipx manually
