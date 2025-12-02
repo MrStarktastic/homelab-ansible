@@ -18,3 +18,4 @@
       --node-ip {{ ansible_host }}
       --disable traefik
       --disable servicelb
+  changed_when: true
