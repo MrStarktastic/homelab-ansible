@@ -39,12 +39,11 @@ jobs:
 
       - name: Setup SSH Key
         run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/private_key.pem
-          chmod 400 ~/.ssh/private_key.pem
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key.pem
+          chmod 400 private_key.pem
 
       - name: Run K3s Playbook
         run: |
           ansible-playbook -i inventory/proxmox.yml \
-            --private-key ~/.ssh/private_key.pem \
+            --private-key private_key.pem \
             k3s.yml

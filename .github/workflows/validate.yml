@@ -37,9 +37,8 @@ jobs:
 
       - name: Setup SSH Key
         run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/private_key.pem
-          chmod 400 ~/.ssh/private_key.pem
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key.pem
+          chmod 400 private_key.pem
 
       - name: Run Ansible Syntax Check
         env:
@@ -49,5 +48,5 @@ jobs:
           PROXMOX_TOKEN_SECRET: ${{ secrets.PROXMOX_TOKEN_SECRET }}
         run: |
           ansible-playbook -i inventory/proxmox.yml \
-            --private-key ~/.ssh/private_key.pem --syntax-check \
+            --private-key private_key.pem --syntax-check \
             k3s.yml
