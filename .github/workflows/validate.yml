@@ -8,7 +8,7 @@ on:
       - main
 
 jobs:
-  validate:
+  lint:
     name: Ansible Lint
     runs-on: ubuntu-latest
     steps:
@@ -20,11 +20,11 @@ jobs:
   syntax-check:
     name: Ansible Syntax Check
     runs-on: self-hosted
-    needs: validate
+    needs: lint
     steps:
       - uses: actions/checkout@v5
 
-      # Apparently the setup-python action is not compatible with Debian self-hosted runners
+      # Apparently the setup-python action is not compatible with Debian
       # so I installed pipx manually
       - name: Install Ansible
         run: |
@@ -32,14 +32,19 @@ jobs:
           pipx inject ansible requests
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
+      - name: Setup SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/private_key.pem
+          chmod 400 ~/.ssh/private_key.pem
+
       - name: Run Ansible Syntax Check
         env:
           PROXMOX_URL: ${{ secrets.PROXMOX_URL }}
           PROXMOX_USER: ${{ secrets.PROXMOX_USER }}
           PROXMOX_TOKEN_ID: ${{ secrets.PROXMOX_TOKEN_ID }}
           PROXMOX_TOKEN_SECRET: ${{ secrets.PROXMOX_TOKEN_SECRET }}
-          # ANSIBLE_SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
-          # echo "$ANSIBLE_SSH_PRIVATE_KEY" > ansible_private_key
-          # chmod 400 ansible_private_key
-          ansible-playbook -i inventory/proxmox.yml --syntax-check k3s.yml
+          ansible-playbook -i inventory/proxmox.yml \
+            --private-key ~/.ssh/private_key.pem --syntax-check \
+            k3s.yml

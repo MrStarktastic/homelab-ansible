@@ -1,7 +1,19 @@
 ---
-- name: Install K3s on workers and join them to cluster
-  ansible.builtin.script: >-
-    k3s-install.sh agent --server https://{{ vip_address }}:6443
-    --flannel-iface {{ flannel_iface }} --node-ip {{ ansible_host }}
+- name: Download K3s install script
+  ansible.builtin.get_url:
+    url: https://get.k3s.io
+    dest: /tmp/k3s-install.sh
+    mode: '0755'
+
+- name: Join Worker to Cluster
+  ansible.builtin.command:
+    cmd: >-
+      /tmp/k3s-install.sh agent
+      --server https://{{ vip_address }}:6443
   environment:
-    K3S_TOKEN: "{{ node_token }}"
+    K3S_TOKEN: "{{ global_k3s_token }}"
+    INSTALL_K3S_EXEC: >-
+      --flannel-iface {{ flannel_iface }}
+      --node-ip {{ ansible_host }}
+  args:
+    creates: /etc/rancher/k3s/k3s.yaml

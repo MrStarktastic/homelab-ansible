@@ -1,61 +1,45 @@
 ---
-- name: Wait for all nodes to be reachable & set DNS nameservers
-  hosts: all_k3s
-  become: true
-  gather_facts: false
-  pre_tasks:
-    - name: Wait until all nodes are reachable
-      ansible.builtin.wait_for_connection:
-        timeout: 300
-        sleep: 5
-  roles:
-    - role: dns_from_cloudinit
-
-- name: Save K3s installation script locally
-  hosts: localhost
-  gather_facts: true
-  tasks:
-    - name: Download script
-      ansible.builtin.get_url:
-        url: https://get.k3s.io
-        dest: ./k3s-install.sh
-        mode: '0755'
-
 - name: Initialize k3s cluster
   hosts: masters[0]
   become: true
   roles:
     - role: k3s_init
 
-- name: Prepare to join other nodes
-  hosts: all_k3s
-  run_once: true
-  gather_facts: false
+- name: Harvest cluster token & VIP check
+  hosts: masters[0]
   become: true
+  gather_facts: false
   tasks:
     - name: Fetch node token
-      delegate_to: "{{ groups['masters'] | first }}"
       ansible.builtin.slurp:
         src: /var/lib/rancher/k3s/server/node-token
       register: node_token_slurp
 
-    - name: Set node token
+    - name: Set token fact globally
       ansible.builtin.set_fact:
-        node_token: "{{ node_token_slurp['content'] | b64decode | trim }}"
+        global_k3s_token: "{{ node_token_slurp['content'] | b64decode | trim }}"
+      delegate_to: "{{ item }}"
+      delegate_facts: true
+      loop: "{{ groups['all_k3s'] }}"
 
-    - name: Wait for Virtual IP to be available
-      delegate_to: "{{ vip_address }}"
-      ansible.builtin.wait_for_connection:
-        timeout: 60
+    - name: Wait for API Server on VIP
+      ansible.builtin.wait_for:
+        host: "{{ vip_address }}"
+        port: 6443
+        timeout: 120
+        state: started
+      delegate_to: localhost
 
-- name: Set up additional masters
+- name: Join additional nasters
   hosts: masters[1:]
   become: true
+  gather_facts: true
   roles:
     - role: k3s_masters
 
-- name: Set up workers
+- name: Join workers
   hosts: workers
   become: true
+  gather_facts: true
   roles:
     - role: k3s_workers

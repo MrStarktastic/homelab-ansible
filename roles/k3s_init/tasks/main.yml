@@ -1,11 +1,21 @@
 ---
-- name: Install K3s and initialize cluster
-  ansible.builtin.script: >-
-    k3s-install.sh server --cluster-init --tls-san {{ vip_address }}
+- name: Download K3s install script
+  ansible.builtin.get_url:
+    url: https://get.k3s.io
+    dest: /tmp/k3s-install.sh
+    mode: '0755'
+
+- name: Install K3s (Init)
+  ansible.builtin.command:
+    cmd: /tmp/k3s-install.sh server --cluster-init --tls-san {{ vip_address }}
   environment:
     INSTALL_K3S_EXEC: >-
-      --flannel-iface {{ flannel_iface }} --node-ip {{ ansible_host }}
-      --disable traefik --disable servicelb
+      --flannel-iface {{ flannel_iface }}
+      --node-ip {{ ansible_host }}
+      --disable traefik
+      --disable servicelb
+  args:
+    creates: /etc/rancher/k3s/k3s.yaml
 
 - name: Set up Kube-Vip
   ansible.builtin.include_tasks: kube-vip.yml

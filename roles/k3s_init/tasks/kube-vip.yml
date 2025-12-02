@@ -3,7 +3,7 @@
   ansible.builtin.file:
     path: "{{ k3s_manifests_directory }}"
     state: directory
-    mode: '0666'
+    mode: '0700'
 
 - name: Upload Kube-Vip RBAC Manifest
   ansible.builtin.get_url:
