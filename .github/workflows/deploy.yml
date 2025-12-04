@@ -31,10 +31,10 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Install Ansible
+      - name: Install Ansible and dependencies
         run: |
           pipx install --include-deps ansible
-          pipx inject ansible requests
+          pipx runpip ansible install -r requirements.txt
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
       - name: Setup SSH Key

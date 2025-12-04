@@ -46,10 +46,10 @@ jobs:
 
       # Apparently the setup-python action is not compatible with Debian
       # so I installed pipx manually
-      - name: Install Ansible
+      - name: Install Ansible and dependencies
         run: |
           pipx install --include-deps ansible
-          pipx inject ansible requests kubernetes
+          pipx runpip ansible install -r requirements.txt
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
       - name: Setup SSH Key
