@@ -7,13 +7,13 @@
 
 - name: Join Master to Cluster
   ansible.builtin.command:
-    cmd: >-
-      /tmp/k3s-install.sh server
-      --server https://{{ vip_address }}:6443
-      --tls-san {{ vip_address }}
+    cmd: /tmp/k3s-install.sh
   environment:
     K3S_TOKEN: "{{ global_k3s_token }}"
     INSTALL_K3S_EXEC: >-
+      server
+      --server https://{{ vip_address }}:6443
+      --tls-san {{ vip_address }}
       --flannel-iface {{ flannel_iface }}
       --node-ip {{ ansible_host }}
       --disable traefik

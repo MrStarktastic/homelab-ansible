@@ -7,9 +7,12 @@
 
 - name: Install K3s (Init)
   ansible.builtin.command:
-    cmd: /tmp/k3s-install.sh server --cluster-init --tls-san {{ vip_address }}
+    cmd: /tmp/k3s-install.sh
   environment:
     INSTALL_K3S_EXEC: >-
+      server
+      --cluster-init
+      --tls-san {{ vip_address }}
       --flannel-iface {{ flannel_iface }}
       --node-ip {{ ansible_host }}
       --disable traefik
