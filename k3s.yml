@@ -43,3 +43,11 @@
   gather_facts: true
   roles:
     - role: k3s_workers
+
+- name: Bootstrap platform
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  become: false
+  roles:
+    - role: bootstrap_platform
