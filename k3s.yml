@@ -1,7 +1,20 @@
 ---
+- name: Wait for SSH availability on all nodes
+  hosts: all_k3s
+  gather_facts: false
+  tasks:
+    - name: Wait for SSH to become available
+      delegate_to: localhost
+      ansible.builtin.wait_for:
+        host: "{{ ansible_host }}"
+        port: 22
+        delay: 10
+        timeout: 300
+
 - name: Initialize k3s cluster
   hosts: masters[0]
   become: true
+  gather_facts: true
   roles:
     - role: k3s_init
 
@@ -46,8 +59,9 @@
 
 - name: Bootstrap platform
   hosts: localhost
-  connection: local
   gather_facts: false
   become: false
+  vars:
+    vip_service_cidrs: "{{ hostvars[groups['masters'][0]]['vip_service_cidrs'] }}"
   roles:
     - role: bootstrap_platform
