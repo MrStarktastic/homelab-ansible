@@ -46,3 +46,14 @@
     content: "{{ k3s_init_kube_vip_daemonset_manifest.stdout }}"
     dest: "{{ k3s_manifests_directory }}/kube-vip-daemonset.yaml"
     mode: '0444'
+
+- name: Configure Kube-Vip service ranges
+  kubernetes.core.k8s:
+    namespace: kube-system
+    definition:
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: kubevip
+      data:
+        cidr-global: "{{ vip_service_cidrs }}"

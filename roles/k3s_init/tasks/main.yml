@@ -16,5 +16,8 @@
       --disable servicelb
   changed_when: true
 
+- name: Setup local kubeconfig
+  ansible.builtin.include_tasks: kubeconfig.yml
+
 - name: Set up Kube-Vip
   ansible.builtin.include_tasks: kube-vip.yml

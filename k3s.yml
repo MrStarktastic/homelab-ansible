@@ -30,7 +30,7 @@
         state: started
       delegate_to: localhost
 
-- name: Join additional nasters
+- name: Join additional masters
   hosts: masters[1:]
   become: true
   gather_facts: true
