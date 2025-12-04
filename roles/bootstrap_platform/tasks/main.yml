@@ -8,3 +8,6 @@
         name: kubevip
       data:
         cidr-global: "{{ vip_service_cidrs }}"
+
+- name: Setup ArgoCD
+  ansible.builtin.include_tasks: argocd.yml
