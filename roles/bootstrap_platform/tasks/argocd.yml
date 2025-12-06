@@ -46,12 +46,16 @@
       metadata:
         name: root
         namespace: argocd
+        finalizers:
+          - resources-finalizer.argocd.argoproj.io
       spec:
         project: default
         source:
           repoURL: "{{ argocd_repo_url }}"
           targetRevision: HEAD
-          path: bootstrap
+          path: apps
+          directory:
+            recurse: true
         destination:
           server: https://kubernetes.default.svc
           namespace: argocd
@@ -59,3 +63,5 @@
           automated:
             prune: true
             selfHeal: true
+          syncOptions:
+            - CreateNamespace=true
