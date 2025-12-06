@@ -18,4 +18,6 @@
       --server https://{{ vip_address }}:6443
       --flannel-iface {{ flannel_iface }}
       --node-ip {{ ansible_host }}
+      --node-label node-role.kubernetes.io/worker=true
+      --node-label node.longhorn.io/create-default-disk=true
   changed_when: true
