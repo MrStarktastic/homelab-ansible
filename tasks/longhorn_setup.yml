@@ -1,0 +1,31 @@
+---
+- name: Check for Longhorn disk existence
+  ansible.builtin.stat:
+    path: "{{ longhorn_disk_device }}"
+  register: disk_check
+
+- name: Configure Longhorn storage
+  when: disk_check.stat.exists
+  block:
+    - name: Create Longhorn mount point
+      ansible.builtin.file:
+        path: "{{ longhorn_mount_path }}"
+        state: directory
+        mode: '0755'
+
+    - name: Format Longhorn disk
+      community.general.filesystem:
+        fstype: ext4
+        dev: "{{ longhorn_disk_device }}"
+
+    - name: Mount Longhorn disk
+      ansible.posix.mount:
+        path: "{{ longhorn_mount_path }}"
+        src: "{{ longhorn_disk_device }}"
+        fstype: ext4
+        state: mounted
+
+- name: Debug Longhorn Status
+  ansible.builtin.debug:
+    msg: "Longhorn disk {{ longhorn_disk_device }} not found. Skipping storage setup."
+  when: not disk_check.stat.exists
