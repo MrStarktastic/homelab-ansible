@@ -8,7 +8,7 @@
     dest: /tmp/k3s-install.sh
     mode: '0755'
 
-- name: Join Worker to Cluster
+- name: Join worker to cluster
   ansible.builtin.command:
     cmd: /tmp/k3s-install.sh
   environment:
@@ -18,6 +18,16 @@
       --server https://{{ vip_address }}:6443
       --flannel-iface {{ flannel_iface }}
       --node-ip {{ ansible_host }}
-      --node-label node-role.kubernetes.io/worker=true
       --node-label node.longhorn.io/create-default-disk=true
   changed_when: true
+
+- name: Label worker node
+  delegate_to: localhost
+  become: false
+  kubernetes.core.k8s:
+    kind: Node
+    name: "{{ inventory_hostname }}"
+    definition:
+      metadata:
+        labels:
+          node-role.kubernetes.io/worker: "true"
