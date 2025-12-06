@@ -25,7 +25,7 @@
         fstype: ext4
         state: mounted
 
-- name: Debug Longhorn Status
+- name: Debug Longhorn status
   ansible.builtin.debug:
     msg: "Longhorn disk {{ longhorn_disk_device }} not found. Skipping storage setup."
   when: not disk_check.stat.exists
