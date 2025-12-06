@@ -43,7 +43,12 @@ jobs:
           version: 'v3.19.2'
 
       - name: Install Helm Diff Plugin
-        run: helm plugin install https://github.com/databus23/helm-diff
+        run: |
+          if ! helm plugin list | grep -q "diff"; then
+            helm plugin install https://github.com/databus23/helm-diff
+          else
+            echo "Helm diff plugin already installed. Skipping."
+          fi
 
       - name: Setup SSH Key
         run: |
