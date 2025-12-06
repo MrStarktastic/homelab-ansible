@@ -9,3 +9,5 @@ vip_service_cidrs: '10.9.9.90/32,10.9.8.90/32'
 
 longhorn_disk_device: "/dev/vdb"
 longhorn_mount_path: "/var/lib/longhorn"
+
+argocd_repo_url: "https://github.com/MrStarktastic/homelab-platform.git"

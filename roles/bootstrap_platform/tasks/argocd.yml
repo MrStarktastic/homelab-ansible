@@ -37,3 +37,27 @@
   until: argocd_deployment.resources[0].status.availableReplicas is defined and argocd_deployment.resources[0].status.availableReplicas > 0
   retries: 20
   delay: 15
+
+- name: Apply ArgoCD root application
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: argoproj.io/v1alpha1
+      kind: Application
+      metadata:
+        name: bootstrap-platform
+        namespace: argocd
+        finalizers:
+          - resources-finalizer.argocd.argoproj.io
+      spec:
+        project: default
+        source:
+          repoURL: "{{ argocd_repo_url }}"
+          targetRevision: HEAD
+          path: bootstrap
+        destination:
+          server: https://kubernetes.default.svc
+          namespace: argocd
+        syncPolicy:
+          automated:
+            prune: true
+            selfHeal: true
