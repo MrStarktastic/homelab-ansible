@@ -1,7 +1,4 @@
 ---
-- name: Setup Longhorn storage
-  ansible.builtin.include_tasks: ../../tasks/longhorn_disk_setup.yml
-
 - name: Download K3s install script
   ansible.builtin.get_url:
     url: https://get.k3s.io
@@ -18,7 +15,6 @@
       --server https://{{ vip_address }}:6443
       --flannel-iface {{ flannel_iface }}
       --node-ip {{ ansible_host }}
-      --node-label node.longhorn.io/create-default-disk=true
   changed_when: true
 
 - name: Label worker node
