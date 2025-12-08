@@ -1,7 +1,4 @@
 ---
-- name: Setup Longhorn storage
-  ansible.builtin.include_tasks: ../../tasks/longhorn_disk_setup.yml
-
 - name: Download K3s install script
   ansible.builtin.get_url:
     url: https://get.k3s.io
