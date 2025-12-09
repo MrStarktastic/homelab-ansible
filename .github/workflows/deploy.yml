@@ -55,8 +55,12 @@ jobs:
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key.pem
           chmod 400 private_key.pem
 
+      - name: Create Ansible Vault password file
+        run: echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > .vault_pass
+
       - name: Run K3s Playbook
         run: |
           ansible-playbook -i inventory/proxmox.yml \
+            --vault-password-file .vault_pass \
             --private-key private_key.pem \
             k3s.yml

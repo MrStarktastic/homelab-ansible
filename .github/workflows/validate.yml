@@ -57,6 +57,9 @@ jobs:
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key.pem
           chmod 400 private_key.pem
 
+      - name: Create Ansible Vault password file
+        run: echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > .vault_pass
+
       - name: Run Ansible Syntax Check
         env:
           PROXMOX_URL: ${{ secrets.PROXMOX_URL }}
@@ -67,6 +70,7 @@ jobs:
           set +e
 
           ansible-playbook -i inventory/proxmox.yml \
+            --vault-password-file .vault_pass \
             --private-key private_key.pem --syntax-check \
             k3s.yml > syntax.log 2>&1
           EXIT_CODE=$?
