@@ -38,20 +38,20 @@
   retries: 20
   delay: 15
 
-- name: Apply infrastructure controllers
+- name: Apply ArgoCD root Application
   kubernetes.core.k8s:
     definition:
       apiVersion: argoproj.io/v1alpha1
       kind: Application
       metadata:
-        name: infrastructure-controllers
+        name: root
         namespace: argocd
       spec:
         project: default
         source:
           repoURL: "{{ argocd_repo_url }}"
           targetRevision: HEAD
-          path: apps/infrastructure/controllers
+          path: apps
           directory:
             recurse: true
         destination:
@@ -63,35 +63,4 @@
             selfHeal: true
           syncOptions:
             - CreateNamespace=true
-
-- name: Apply infrastructure configs
-  kubernetes.core.k8s:
-    definition:
-      apiVersion: argoproj.io/v1alpha1
-      kind: Application
-      metadata:
-        name: infrastructure-configs
-        namespace: argocd
-      spec:
-        project: default
-        source:
-          repoURL: "{{ argocd_repo_url }}"
-          targetRevision: HEAD
-          path: apps/infrastructure/configs
-          directory:
-            recurse: true
-        destination:
-          server: https://kubernetes.default.svc
-          namespace: default 
-        syncPolicy:
-          automated:
-            prune: true
-            selfHeal: true
-          syncOptions:
-            - CreateNamespace=true
-          retry:
-            limit: 10
-            backoff:
-              duration: "10s"
-              factor: 2
-              maxDuration: "3m"
+            - ServerSideApply=true
