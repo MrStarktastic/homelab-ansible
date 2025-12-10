@@ -38,20 +38,20 @@
   retries: 20
   delay: 15
 
-- name: Apply ArgoCD root Application
+- name: Apply infrastructure controllers
   kubernetes.core.k8s:
     definition:
       apiVersion: argoproj.io/v1alpha1
       kind: Application
       metadata:
-        name: root
+        name: infrastructure-controllers
         namespace: argocd
       spec:
         project: default
         source:
           repoURL: "{{ argocd_repo_url }}"
           targetRevision: HEAD
-          path: apps
+          path: apps/infrastructure/controllers
           directory:
             recurse: true
         destination:
@@ -63,10 +63,75 @@
             selfHeal: true
           syncOptions:
             - CreateNamespace=true
-            - ServerSideApply=true
-          retry:
-            limit: 15
-            backoff:
-              duration: "10s"
-              factor: 2
-              maxDuration: "3m"
+
+- name: Wait for Cert-Manager CRDs
+  kubernetes.core.k8s_info:
+    api_version: apiextensions.k8s.io/v1
+    kind: CustomResourceDefinition
+    name: certificates.cert-manager.io
+  register: crd_check
+  until: crd_check.resources | length > 0
+  retries: 30
+  delay: 10
+
+- name: Wait for Sealed-Secrets CRDs
+  kubernetes.core.k8s_info:
+    api_version: apiextensions.k8s.io/v1
+    kind: CustomResourceDefinition
+    name: sealedsecrets.bitnami.com
+  register: ss_crd_check
+  until: ss_crd_check.resources | length > 0
+  retries: 30
+  delay: 10
+
+- name: Apply infrastructure configs
+  kubernetes.core.k8s:
+    definition:
+      apiVersion: argoproj.io/v1alpha1
+      kind: Application
+      metadata:
+        name: infrastructure-configs
+        namespace: argocd
+      spec:
+        project: default
+        source:
+          repoURL: "{{ argocd_repo_url }}"
+          targetRevision: HEAD
+          path: apps/infrastructure/configs
+          directory:
+            recurse: true
+        destination:
+          server: https://kubernetes.default.svc
+          namespace: default 
+        syncPolicy:
+          automated:
+            prune: true
+            selfHeal: true
+          syncOptions:
+            - CreateNamespace=true
+
+# - name: Apply services
+#   kubernetes.core.k8s:
+#     definition:
+#       apiVersion: argoproj.io/v1alpha1
+#       kind: Application
+#       metadata:
+#         name: services-root
+#         namespace: argocd
+#       spec:
+#         project: default
+#         source:
+#           repoURL: "{{ argocd_repo_url }}"
+#           targetRevision: HEAD
+#           path: apps/services
+#           directory:
+#             recurse: true
+#         destination:
+#           server: https://kubernetes.default.svc
+#           namespace: argocd
+#         syncPolicy:
+#           automated:
+#             prune: true
+#             selfHeal: true
+#           syncOptions:
+#             - CreateNamespace=true
