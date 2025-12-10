@@ -27,6 +27,9 @@
         replicas: 1
       redis:
         enabled: true
+      configs:
+        secret:
+          argocdServerAdminPassword: "{{ argocd_admin_password_hash }}"
 
 - name: Wait for ArgoCD server to start
   kubernetes.core.k8s_info:
