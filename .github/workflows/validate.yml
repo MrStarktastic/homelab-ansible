@@ -31,7 +31,7 @@ jobs:
 
       - name: Upload artifacts
         if: always()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: ansible-lint-results
           path: |
@@ -80,7 +80,7 @@ jobs:
 
       - name: Upload artifacts
         if: always()
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: ansible-syntax-results
           path: |
@@ -96,12 +96,12 @@ jobs:
       pull-requests: write
     steps:
       - name: Download Lint Results
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: ansible-lint-results
 
       - name: Download Syntax Results
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: ansible-syntax-results
 
