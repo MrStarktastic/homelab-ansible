@@ -31,6 +31,22 @@
       configs:
         secret:
           argocdServerAdminPassword: "{{ argocd_admin_password_hash }}"
+          extra:
+            oidc.authentik.clientID: "{{ argocd_oidc_client_id }}"
+            oidc.authentik.clientSecret: "{{ argocd_oidc_client_secret }}"
+        cm:
+          url: "https://argocd.internal.starktastic.net"
+          oidc.config: |
+            name: Authentik
+            issuer: "https://auth.starktastic.net/application/o/argocd/"
+            clientID: "$oidc.authentik.clientID"
+            clientSecret: "$oidc.authentik.clientSecret"
+            requestedScopes: ["openid", "profile", "email", "groups"]
+        rbac:
+          policy.default: role:readonly
+          scopes: "[groups]"
+          policy.csv: |
+            g, authentik Admins, role:admin
 
 - name: Wait for ArgoCD server to start
   kubernetes.core.k8s_info:
