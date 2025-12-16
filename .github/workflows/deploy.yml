@@ -6,8 +6,7 @@ on:
   repository_dispatch:
     types: [infrastructure-changed]
 
-  pull_request_target:
-    types: [closed]
+  push:
     branches:
       - main
     paths-ignore:
@@ -17,10 +16,6 @@ on:
 jobs:
   deploy:
     name: Apply Configuration
-    if: |
-      github.event_name == 'workflow_dispatch' ||
-      github.event_name == 'repository_dispatch' ||
-      (github.event_name == 'pull_request_target' && github.event.pull_request.merged == true)
     runs-on: self-hosted
     env:
       PROXMOX_URL: ${{ secrets.PROXMOX_URL }}
