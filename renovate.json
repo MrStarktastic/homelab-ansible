@@ -5,5 +5,14 @@
   ],
   "ansible": {
     "managerFilePatterns": ["/(^|/)tasks/[^/]+\\.ya?ml$/"]
-  }
+  },
+  "customManagers": [
+    {
+      "customType": "regex",
+      "fileMatch": ["(^|/)tasks/[^/]+\\.ya?ml$", "\\.ya?ml$"],
+      "matchStrings": [
+        "#\\s*renovate:\\s*datasource=(?<datasource>.*?)\\s+depName=(?<depName>.*?)(?:\\s+registryUrl=(?<registryUrl>.*?))?\\s+.*?chart_version:\\s*\"?(?<currentValue>.*?)\"?\\s"
+      ]
+    }
+  ]
 }
