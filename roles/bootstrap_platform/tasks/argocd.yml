@@ -14,8 +14,9 @@
     name: argocd
     chart_ref: argo/argo-cd
     release_namespace: argocd
+    # renovate: datasource=helm depName=argo-cd registryUrl=https://argoproj.github.io/argo-helm
+    chart_version: "9.1.6"
     update_repo_cache: true
-    chart_version: "9.1.6" 
     values:
       controller:
         replicas: 1
