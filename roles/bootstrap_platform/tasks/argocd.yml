@@ -38,7 +38,7 @@
           url: "https://argocd.internal.starktastic.net"
           oidc.config: |
             name: Authentik
-            issuer: "https://auth.starktastic.net/application/o/argocd/"
+            issuer: "https://auth.starktastic.net/application/o/argo-cd/"
             clientID: "$oidc.authentik.clientID"
             clientSecret: "$oidc.authentik.clientSecret"
             requestedScopes: ["openid", "profile", "email", "groups"]
