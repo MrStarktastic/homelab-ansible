@@ -48,32 +48,34 @@
           policy.csv: |
             g, authentik Admins, role:admin
 
-- name: Wait for ArgoCD server to start
+- name: Wait for ArgoCD server to be ready
   kubernetes.core.k8s_info:
     kind: Deployment
     namespace: argocd
-    name: argocd-server
-  register: argocd_deployment
-  until: argocd_deployment.resources[0].status.availableReplicas is defined and argocd_deployment.resources[0].status.availableReplicas > 0
-  retries: 20
-  delay: 15
+    label_selectors:
+      - "app.kubernetes.io/part-of=argocd"
+  register: argocd_pods
+  until: >
+    argocd_pods.resources | length > 0 and
+    argocd_pods.resources | map(attribute='status.availableReplicas') | select('defined') | list | length == argocd_pods.resources | length
+  retries: 30
+  delay: 10
 
-- name: Apply infrastructure controllers
+- name: Apply app of apps bootstrap
   kubernetes.core.k8s:
     definition:
       apiVersion: argoproj.io/v1alpha1
       kind: Application
       metadata:
-        name: infrastructure-controllers
+        name: cluster-bootstrap
         namespace: argocd
+        finalizers: ["resources-finalizer.argocd.argoproj.io"]
       spec:
         project: default
         source:
           repoURL: "{{ argocd_repo_url }}"
           targetRevision: HEAD
-          path: apps/infrastructure/controllers
-          directory:
-            recurse: true
+          path: apps/bootstrap
         destination:
           server: https://kubernetes.default.svc
           namespace: argocd
@@ -81,105 +83,3 @@
           automated:
             prune: true
             selfHeal: true
-          retry:
-            limit: 5
-            backoff:
-              duration: 5s
-              factor: 2
-              maxDuration: 3m
-          syncOptions:
-            - CreateNamespace=true
-
-- name: Wait for Cert-Manager CRDs
-  kubernetes.core.k8s_info:
-    api_version: apiextensions.k8s.io/v1
-    kind: CustomResourceDefinition
-    name: certificates.cert-manager.io
-  register: crd_check
-  until: crd_check.resources | length > 0
-  retries: 30
-  delay: 10
-
-- name: Wait for Sealed-Secrets CRDs
-  kubernetes.core.k8s_info:
-    api_version: apiextensions.k8s.io/v1
-    kind: CustomResourceDefinition
-    name: sealedsecrets.bitnami.com
-  register: ss_crd_check
-  until: ss_crd_check.resources | length > 0
-  retries: 30
-  delay: 10
-
-- name: Wait for Traefik CRDs
-  kubernetes.core.k8s_info:
-    api_version: apiextensions.k8s.io/v1
-    kind: CustomResourceDefinition
-    name: ingressroutes.traefik.io
-  register: traefik_crd_check
-  until: traefik_crd_check.resources | length > 0
-  retries: 30
-  delay: 10
-
-- name: Apply infrastructure configs
-  kubernetes.core.k8s:
-    definition:
-      apiVersion: argoproj.io/v1alpha1
-      kind: Application
-      metadata:
-        name: infrastructure-configs
-        namespace: argocd
-      spec:
-        project: default
-        source:
-          repoURL: "{{ argocd_repo_url }}"
-          targetRevision: HEAD
-          path: apps/infrastructure/configs
-          directory:
-            recurse: true
-        destination:
-          server: https://kubernetes.default.svc
-          namespace: default 
-        syncPolicy:
-          automated:
-            prune: true
-            selfHeal: true
-          retry:
-            limit: 5
-            backoff:
-              duration: 5s
-              factor: 2
-              maxDuration: 3m
-          syncOptions:
-            - CreateNamespace=true
-
-# - name: Apply services
-#   kubernetes.core.k8s:
-#     definition:
-#       apiVersion: argoproj.io/v1alpha1
-#       kind: Application
-#       metadata:
-#         name: services-root
-#         namespace: argocd
-#       spec:
-#         project: default
-#         source:
-#           repoURL: "{{ argocd_repo_url }}"
-#           targetRevision: HEAD
-#           path: apps/services
-#           directory:
-#             recurse: true
-#         destination:
-#           server: https://kubernetes.default.svc
-#           namespace: argocd
-#         syncPolicy:
-#           automated:
-#             prune: true
-#             selfHeal: true
-#           retry:
-#             limit: 5
-#             backoff:
-#               duration: 5s
-#               factor: 2
-#               maxDuration: 3m
-#           syncOptions:
-#             - CreateNamespace=true
