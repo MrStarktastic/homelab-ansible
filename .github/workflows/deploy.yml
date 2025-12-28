@@ -17,6 +17,8 @@ jobs:
   deploy:
     name: Apply Configuration
     runs-on: self-hosted
+    container:
+      image: ansible/ansible:default
     env:
       PROXMOX_URL: ${{ secrets.PROXMOX_URL }}
       PROXMOX_USER: ${{ secrets.PROXMOX_USER }}
@@ -26,11 +28,8 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Install Ansible and dependencies
-        run: |
-          pipx install --include-deps ansible
-          pipx runpip ansible install -r requirements.txt
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: Install requirements
+        run: pip install -r requirements.txt
 
       - name: Setup Helm
         uses: azure/setup-helm@v4.3.1
