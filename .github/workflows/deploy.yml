@@ -18,7 +18,7 @@ jobs:
     name: Apply Configuration
     runs-on: self-hosted
     container:
-      image: alpine/ansible:latest
+      image: python:slim
     env:
       PROXMOX_URL: ${{ secrets.PROXMOX_URL }}
       PROXMOX_USER: ${{ secrets.PROXMOX_USER }}
@@ -28,7 +28,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Install requirements
+      - name: Install Ansible and requirements
         run: pip install -r requirements.txt
 
       - name: Setup Helm
