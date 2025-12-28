@@ -27,7 +27,7 @@
 
 - name: Install helm-diff plugin
   kubernetes.core.helm_plugin:
-    plugin_name: helm-diff
+    plugin_path: https://github.com/databus23/helm-diff
     state: present
 
 - name: Setup ArgoCD
