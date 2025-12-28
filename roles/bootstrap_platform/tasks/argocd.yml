@@ -53,7 +53,7 @@
     kind: Deployment
     namespace: argocd
     label_selectors:
-      - "app.kubernetes.io/part-of=argocd"
+      - "app.kubernetes.io/name=argocd-server"
   register: argocd_pods
   until: >
     argocd_pods.resources | length > 0 and
