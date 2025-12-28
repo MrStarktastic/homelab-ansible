@@ -15,7 +15,7 @@
     chart_ref: argo/argo-cd
     release_namespace: argocd
     # renovate: datasource=helm depName=argo-cd registryUrl=https://argoproj.github.io/argo-helm
-    chart_version: "9.1.6"
+    chart_version: "9.2.0"
     update_repo_cache: true
     values:
       controller:
@@ -38,7 +38,7 @@
           url: "https://argocd.internal.starktastic.net"
           oidc.config: |
             name: Authentik
-            issuer: "https://auth.starktastic.net/application/o/argocd/"
+            issuer: "https://auth.starktastic.net/application/o/argo-cd/"
             clientID: "$oidc.authentik.clientID"
             clientSecret: "$oidc.authentik.clientSecret"
             requestedScopes: ["openid", "profile", "email", "groups"]
