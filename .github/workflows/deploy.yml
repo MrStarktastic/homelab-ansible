@@ -17,33 +17,33 @@ jobs:
   deploy:
     name: Apply Configuration
     runs-on: self-hosted
+    container:
+      image: python:3.14.2-trixie
     env:
       PROXMOX_URL: ${{ secrets.PROXMOX_URL }}
       PROXMOX_USER: ${{ secrets.PROXMOX_USER }}
       PROXMOX_TOKEN_ID: ${{ secrets.PROXMOX_TOKEN_ID }}
       PROXMOX_TOKEN_SECRET: ${{ secrets.PROXMOX_TOKEN_SECRET }}
+      PIP_CACHE_DIR: ${{ github.workspace }}/.pip-cache
 
     steps:
       - uses: actions/checkout@v6
 
-      - name: Install Ansible and dependencies
-        run: |
-          pipx install --include-deps ansible
-          pipx runpip ansible install -r requirements.txt
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: Cache Pip Packages
+        uses: actions/cache@v5.0.1
+        with:
+          path: ${{ env.PIP_CACHE_DIR }}
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install Ansible and requirements
+        run: pip install -r requirements.txt
 
       - name: Setup Helm
         uses: azure/setup-helm@v4.3.1
         with:
-          version: 'v3.19.2'
-
-      - name: Install Helm Diff Plugin
-        run: |
-          if ! helm plugin list | grep -q "diff"; then
-            helm plugin install https://github.com/databus23/helm-diff
-          else
-            echo "Helm diff plugin already installed. Skipping."
-          fi
+          version: 'v3.19.4'
 
       - name: Setup SSH Key
         run: |
