@@ -42,7 +42,7 @@ jobs:
     name: Ansible Syntax Check
     runs-on: self-hosted
     container:
-      image: ansible/ansible:default
+      image: alpine/ansible:latest
     steps:
       - uses: actions/checkout@v6
 

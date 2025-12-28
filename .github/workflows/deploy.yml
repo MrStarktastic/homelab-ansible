@@ -18,7 +18,7 @@ jobs:
     name: Apply Configuration
     runs-on: self-hosted
     container:
-      image: ansible/ansible:default
+      image: alpine/ansible:latest
     env:
       PROXMOX_URL: ${{ secrets.PROXMOX_URL }}
       PROXMOX_USER: ${{ secrets.PROXMOX_USER }}
