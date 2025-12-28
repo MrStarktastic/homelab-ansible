@@ -41,16 +41,13 @@ jobs:
   syntax-check:
     name: Ansible Syntax Check
     runs-on: self-hosted
+    container:
+      image: python:slim
     steps:
       - uses: actions/checkout@v6
 
-      # Apparently the setup-python action is not compatible with Debian
-      # so I installed pipx manually
-      - name: Install Ansible and dependencies
-        run: |
-          pipx install --include-deps ansible
-          pipx runpip ansible install -r requirements.txt
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: Install Ansible and requirements
+        run: pip install -r requirements.txt
 
       - name: Setup SSH Key
         run: |
@@ -97,11 +94,13 @@ jobs:
     steps:
       - name: Download Lint Results
         uses: actions/download-artifact@v7
+        continue-on-error: true
         with:
           name: ansible-lint-results
 
       - name: Download Syntax Results
         uses: actions/download-artifact@v7
+        continue-on-error: true
         with:
           name: ansible-syntax-results
 
@@ -109,16 +108,34 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          LINT_EXIT_CODE=$(cat lint.exitcode)
-          SYNTAX_EXIT_CODE=$(cat syntax.exitcode)
+          if [ -f "lint.exitcode" ]; then
+            LINT_CODE=$(cat lint.exitcode)
+            LINT_LOG=$(cat lint.log)
+            if [ "$LINT_CODE" -eq "0" ]; then
+               LINT_ICON="✅ Passed"
+            else
+               LINT_ICON="❌ Failed"
+            fi
+          else
+            LINT_CODE=1
+            LINT_ICON="⚠️ Skipped / Crashed"
+            LINT_LOG="No log available. The job likely failed before generating artifacts."
+          fi
 
-          LINT_LOG=$(cat lint.log)
-          SYNTAX_LOG=$(cat syntax.log)
+          if [ -f "syntax.exitcode" ]; then
+            SYNTAX_CODE=$(cat syntax.exitcode)
+            SYNTAX_LOG=$(cat syntax.log)
+            if [ "$SYNTAX_CODE" -eq "0" ]; then
+               SYNTAX_ICON="✅ Passed"
+            else
+               SYNTAX_ICON="❌ Failed"
+            fi
+          else
+            SYNTAX_CODE=1
+            SYNTAX_ICON="⚠️ Skipped / Crashed"
+            SYNTAX_LOG="No log available."
+          fi
 
-          if [ "$LINT_EXIT_CODE" -eq "0" ]; then LINT_ICON="✅ Passed"; else LINT_ICON="❌ Failed"; fi
-          if [ "$SYNTAX_EXIT_CODE" -eq "0" ]; then SYNTAX_ICON="✅ Passed"; else SYNTAX_ICON="❌ Failed"; fi
-
-          # Using delimiter to handle multiline content safely
           EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
           
           cat << $EOF > comment_body.md
@@ -146,13 +163,12 @@ jobs:
           </details>
           $EOF
 
-          # Post Comment
           gh pr comment ${{ github.event.pull_request.number }} \
             -R ${{ github.repository }} \
             --body-file comment_body.md
 
-          if [ "$LINT_EXIT_CODE" -ne "0" ] || [ "$SYNTAX_EXIT_CODE" -ne "0" ]; then
-            echo "::error::Validation checks failed."
+          if [ "$LINT_CODE" -ne "0" ] || [ "$SYNTAX_CODE" -ne "0" ]; then
+            echo "::error::Validation checks failed or were skipped."
             exit 1
           else
             echo "All checks passed."
