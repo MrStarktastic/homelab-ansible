@@ -12,15 +12,13 @@ jobs:
   lint:
     name: Ansible Lint
     runs-on: ubuntu-latest
-    env:
-      PIP_CACHE_DIR: ${{ github.workspace }}/.pip-cache
     steps:
       - uses: actions/checkout@v6
 
       - name: Cache Pip Packages
         uses: actions/cache@v5.0.1
         with:
-          path: ${{ env.PIP_CACHE_DIR }}
+          path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
           restore-keys: |
             ${{ runner.os }}-pip-
