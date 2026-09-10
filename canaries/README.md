@@ -7,6 +7,20 @@ That entry retains its `k3s_common` dependency. Production `k3s.yml`, Kube-VIP,
 ArgoCD/bootstrap, production secrets and `$HOME/.kube/config` are never needed.
 Do not use a production VM, inventory, image containing credentials, or vault.
 
+## Authoring-only merge safety
+
+The existing `deploy.yml` runs the **production** K3s playbook on qualifying
+pushes to `main`. An authoring-only merge must retain `[skip ci]` in the
+**resulting merge commit message**. Keep the marker in the PR title and check
+the merge message; a marker only in the PR body does not skip this push
+trigger. Run the PR checks before merging, without adding skip markers to the
+implementation commits.
+
+Do not dispatch `Deploy K3s Cluster` or `infrastructure-changed` to run this
+canary. Those are production entry points, not the isolated invocation below.
+
+## Disposable node requirements
+
 The VM must have its final hostname, the storage interface, a cloud-init
 resolver at `/run/systemd/resolve/resolv.conf`, and working SSH/sudo. Use a clean
 VM; do not repurpose an existing cluster. A changed IQN is refused while iSCSI
